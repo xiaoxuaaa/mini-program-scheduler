@@ -450,6 +450,16 @@ function closeAddTaskModal() {
     document.getElementById('addTaskModal').classList.remove('active');
 }
 
+// 打开帮助模态框
+function openHelpModal() {
+    document.getElementById('helpModal').classList.add('active');
+}
+
+// 关闭帮助模态框
+function closeHelpModal() {
+    document.getElementById('helpModal').classList.remove('active');
+}
+
 // ==================== 创建/更新任务 ====================
 
 // 创建任务

@@ -521,6 +521,168 @@
             background: #f44336;
         }
 
+        /* 帮助模态框样式 */
+        .help-content {
+            line-height: 1.8;
+        }
+
+        .help-section {
+            margin-bottom: 32px;
+        }
+
+        .help-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #C4612F;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #F2E3D6;
+        }
+
+        .help-list {
+            padding-left: 24px;
+            color: #1F2421;
+        }
+
+        .help-list li {
+            margin-bottom: 8px;
+        }
+
+        .operation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .operation-item {
+            background: #FBF9F5;
+            border: 1px solid #E7E1D7;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .operation-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .operation-name {
+            font-weight: 600;
+            color: #1F2421;
+            margin-bottom: 8px;
+        }
+
+        .operation-desc {
+            font-size: 13px;
+            color: #5C635D;
+            margin-bottom: 8px;
+        }
+
+        .operation-tip {
+            font-size: 12px;
+            color: #C4612F;
+            background: #F2E3D6;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .example-box {
+            background: #FBF9F5;
+            border-left: 4px solid #C4612F;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: #C4612F;
+            margin-bottom: 12px;
+        }
+
+        .example-steps {
+            padding-left: 24px;
+            margin: 0;
+        }
+
+        .example-steps li {
+            margin-bottom: 6px;
+            color: #1F2421;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: #C4612F;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-right: 6px;
+        }
+
+        .warning-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .warning-list li {
+            background: #FBF9F5;
+            border-left: 3px solid #C4612F;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .warning-list strong {
+            color: #C4612F;
+        }
+
+        .faq-item {
+            margin-bottom: 16px;
+            background: #FBF9F5;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .faq-q {
+            font-weight: 600;
+            color: #1F2421;
+            margin-bottom: 6px;
+        }
+
+        .faq-a {
+            color: #5C635D;
+            padding-left: 12px;
+        }
+
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .keyboard-item {
+            background: #FBF9F5;
+            border: 1px solid #E7E1D7;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .keyboard-item code {
+            background: #FFFFFF;
+            color: #C4612F;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+
         @media (max-width: 640px) {
             body { padding: 12px; }
             header { padding: 20px; }
@@ -529,6 +691,8 @@
             .btn { min-width: unset; }
             .task-header { flex-direction: column; gap: 12px; }
             .modal-content { padding: 20px; }
+            .operation-grid { grid-template-columns: 1fr; }
+            .keyboard-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -544,6 +708,7 @@
                 <button class="btn btn-primary" id="startBtn" onclick="startScheduler()">启动调度器</button>
                 <button class="btn btn-secondary" id="stopBtn" onclick="stopScheduler()">停止调度器</button>
                 <button class="btn btn-secondary" onclick="openAddTaskModal()">添加任务</button>
+                <button class="btn btn-secondary" onclick="openHelpModal()">📖 帮助</button>
             </div>
             <div class="status" id="statusBar">
                 <div class="status-dot" id="statusDot"></div>
@@ -584,6 +749,144 @@
             <div class="modal-actions">
                 <button type="button" class="btn btn-primary" onclick="createTask()" id="submitTaskBtn">创建任务</button>
                 <button type="button" class="btn btn-secondary" onclick="closeAddTaskModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助模态框 -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <h3 class="modal-header">📖 使用教程</h3>
+
+            <div class="help-content">
+                <section class="help-section">
+                    <h4 class="help-title">🚀 快速开始</h4>
+                    <ol class="help-list">
+                        <li>点击 <strong>"添加任务"</strong> 按钮</li>
+                        <li>填写任务名称（如：小程序抢课）</li>
+                        <li>点击 <strong>"+ 添加时间点"</strong></li>
+                        <li>设置执行时间（如：20:57）</li>
+                        <li>添加需要的操作（点击、输入、按键等）</li>
+                        <li>点击 <strong>"创建任务"</strong></li>
+                        <li>点击 <strong>"启动调度器"</strong></li>
+                    </ol>
+                </section>
+
+                <section class="help-section">
+                    <h4 class="help-title">🎯 操作类型说明</h4>
+                    <div class="operation-grid">
+                        <div class="operation-item">
+                            <div class="operation-icon">🖱️</div>
+                            <div class="operation-name">点击</div>
+                            <div class="operation-desc">鼠标点击指定坐标位置，支持单击/双击</div>
+                            <div class="operation-tip">💡 使用"获取坐标"功能精确定位</div>
+                        </div>
+                        <div class="operation-item">
+                            <div class="operation-icon">⌨️</div>
+                            <div class="operation-name">输入文本</div>
+                            <div class="operation-desc">输入英文文本（仅支持英文字符）</div>
+                            <div class="operation-tip">💡 适用于网址、英文表单等</div>
+                        </div>
+                        <div class="operation-item">
+                            <div class="operation-icon">📋</div>
+                            <div class="operation-name">粘贴</div>
+                            <div class="operation-desc">粘贴任何文本，支持中文、日文等</div>
+                            <div class="operation-tip">💡 中文输入必须使用此功能</div>
+                        </div>
+                        <div class="operation-item">
+                            <div class="operation-icon">🔘</div>
+                            <div class="operation-name">按键</div>
+                            <div class="operation-desc">按下键盘按键或快捷键</div>
+                            <div class="operation-tip">💡 常用：enter、tab、ctrl+c、win+d</div>
+                        </div>
+                        <div class="operation-item">
+                            <div class="operation-icon">⏱️</div>
+                            <div class="operation-name">等待</div>
+                            <div class="operation-desc">暂停指定秒数（支持小数）</div>
+                            <div class="operation-tip">💡 用于等待页面加载、动画等</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h4 class="help-title">📝 使用示例</h4>
+                    <div class="example-box">
+                        <div class="example-title">示例1：自动登录</div>
+                        <ol class="example-steps">
+                            <li><span class="step-badge">点击</span> 点击用户名框 (800, 300)</li>
+                            <li><span class="step-badge">粘贴</span> 粘贴用户名：张三</li>
+                            <li><span class="step-badge">按键</span> 按下 Tab 切换到密码框</li>
+                            <li><span class="step-badge">粘贴</span> 粘贴密码</li>
+                            <li><span class="step-badge">按键</span> 按下 Enter 登录</li>
+                        </ol>
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">示例2：小程序抢课</div>
+                        <ol class="example-steps">
+                            <li><span class="step-badge">时间点 1</span> 20:55 - 打开微信小程序</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">按键</span> Win+D 回到桌面</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击微信图标</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">等待</span> 等待 2 秒</li>
+                            <li><span class="step-badge">时间点 2</span> 21:00 - 执行抢课</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击目标课程</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击立即预约</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h4 class="help-title">⚠️ 注意事项</h4>
+                    <ul class="warning-list">
+                        <li><strong>坐标准确性：</strong>坐标与屏幕分辨率相关，更换电脑需重新获取</li>
+                        <li><strong>窗口位置：</strong>执行时目标窗口需要在前台（不能最小化）</li>
+                        <li><strong>中文输入：</strong>"输入"操作仅支持英文，中文必须使用"粘贴"</li>
+                        <li><strong>测试建议：</strong>首次使用建议设置1-2分钟后的测试任务</li>
+                        <li><strong>提前启动：</strong>在执行时间前5-10分钟启动调度器</li>
+                    </ul>
+                </section>
+
+                <section class="help-section">
+                    <h4 class="help-title">🔧 常见问题</h4>
+                    <div class="faq-item">
+                        <div class="faq-q">Q: 如何获取精确坐标？</div>
+                        <div class="faq-a">A: 点击"获取坐标"按钮，10秒倒计时后自动获取当前鼠标位置</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-q">Q: 中文粘贴失败怎么办？</div>
+                        <div class="faq-a">A: 确保使用"粘贴"操作而非"输入文本"操作</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-q">Q: 任务没有执行？</div>
+                        <div class="faq-a">A: 检查调度器是否已启动（绿色圆点），时间设置是否正确</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-q">Q: 如何调整操作顺序？</div>
+                        <div class="faq-a">A: 使用操作卡片上的 ↑ ↓ 按钮上下移动</div>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h4 class="help-title">⌨️ 常用按键参考</h4>
+                    <div class="keyboard-grid">
+                        <div class="keyboard-item"><code>enter</code> 回车</div>
+                        <div class="keyboard-item"><code>tab</code> 切换</div>
+                        <div class="keyboard-item"><code>esc</code> 取消</div>
+                        <div class="keyboard-item"><code>space</code> 空格</div>
+                        <div class="keyboard-item"><code>ctrl+c</code> 复制</div>
+                        <div class="keyboard-item"><code>ctrl+v</code> 粘贴</div>
+                        <div class="keyboard-item"><code>ctrl+a</code> 全选</div>
+                        <div class="keyboard-item"><code>ctrl+z</code> 撤销</div>
+                        <div class="keyboard-item"><code>win+d</code> 显示桌面</div>
+                        <div class="keyboard-item"><code>alt+tab</code> 切换窗口</div>
+                        <div class="keyboard-item"><code>ctrl+shift+esc</code> 任务管理器</div>
+                        <div class="keyboard-item"><code>f5</code> 刷新</div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" onclick="closeHelpModal()">我知道了</button>
             </div>
         </div>
     </div>
