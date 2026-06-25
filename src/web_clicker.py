@@ -2,6 +2,7 @@
 网页自动化模块
 使用 Selenium 进行网页元素定位和点击
 """
+# -*- coding: utf-8 -*-
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -48,11 +49,11 @@ class WebClicker:
 
             # 打开网页
             self.driver.get(url)
-            print(f"✅ 浏览器已打开：{url}")
+            print(f"[OK] 浏览器已打开：{url}")
             return True
 
         except Exception as e:
-            print(f"❌ 启动浏览器失败: {e}")
+            print(f"[ERROR] 启动浏览器失败: {e}")
             return False
 
     def inject_selector_script(self) -> bool:
@@ -175,15 +176,15 @@ class WebClicker:
             hint.textContent = '👆 请点击要抢的按钮';
             document.body.appendChild(hint);
 
-            console.log('✅ 选择器脚本已注入');
+            console.log('[OK] 选择器脚本已注入');
             """
 
             self.driver.execute_script(script)
-            print("✅ 选择器脚本已注入，等待用户点击...")
+            print("[OK] 选择器脚本已注入，等待用户点击...")
             return True
 
         except Exception as e:
-            print(f"❌ 注入脚本失败: {e}")
+            print(f"[ERROR] 注入脚本失败: {e}")
             return False
 
     def get_selected_element(self) -> Optional[Dict[str, Any]]:
@@ -197,7 +198,7 @@ class WebClicker:
             selector_info = self.driver.execute_script("return window.selectorInfo;")
             return selector_info
         except Exception as e:
-            print(f"❌ 获取选择器失败: {e}")
+            print(f"[ERROR] 获取选择器失败: {e}")
             return None
 
     def click_element(self, selector: str, selector_type: str = "xpath") -> bool:
@@ -222,11 +223,11 @@ class WebClicker:
                 )
 
             element.click()
-            print(f"✅ 点击成功: {selector}")
+            print(f"[OK] 点击成功: {selector}")
             return True
 
         except Exception as e:
-            print(f"❌ 点击失败: {e}")
+            print(f"[ERROR] 点击失败: {e}")
             return False
 
     def test_selector(self, selector: str, selector_type: str = "xpath") -> bool:
@@ -247,7 +248,7 @@ class WebClicker:
                 elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
 
             if len(elements) > 0:
-                print(f"✅ 找到 {len(elements)} 个匹配元素")
+                print(f"[OK] 找到 {len(elements)} 个匹配元素")
                 # 高亮第一个元素
                 self.driver.execute_script(
                     "arguments[0].style.border = '3px solid #00FF00';",
@@ -255,11 +256,11 @@ class WebClicker:
                 )
                 return True
             else:
-                print("❌ 未找到匹配元素")
+                print("[ERROR] 未找到匹配元素")
                 return False
 
         except Exception as e:
-            print(f"❌ 测试失败: {e}")
+            print(f"[ERROR] 测试失败: {e}")
             return False
 
     def close(self):
@@ -267,7 +268,7 @@ class WebClicker:
         if self.driver:
             self.driver.quit()
             self.driver = None
-            print("✅ 浏览器已关闭")
+            print("[OK] 浏览器已关闭")
 
     def __del__(self):
         """析构函数，确保浏览器被关闭"""
