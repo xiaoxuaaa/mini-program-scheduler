@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from src.config_manager import ConfigManager
 from src.scheduler import TaskScheduler
 from src.clicker import Clicker
+from src.web_clicker import WebClicker
 
 app = Flask(__name__)
 CORS(app)  # 允许跨域访问
@@ -22,6 +23,7 @@ CORS(app)  # 允许跨域访问
 config_manager = ConfigManager()
 scheduler = None
 clicker = Clicker()
+web_clicker = None  # 网页点击器实例
 
 
 # ==================== 页面路由 ====================
@@ -292,6 +294,151 @@ def get_mouse_position():
             'y': y
         }
     })
+
+
+# ==================== 网页选择器 API ====================
+
+@app.route('/api/web/start-selector', methods=['POST'])
+def start_web_selector():
+    """启动网页选择器，打开浏览器供用户点击元素"""
+    global web_clicker
+
+    data = request.json
+    url = data.get('url')
+
+    if not url:
+        return jsonify({
+            'success': False,
+            'message': '请提供网页地址'
+        }), 400
+
+    try:
+        # 关闭之前的浏览器（如果有）
+        if web_clicker:
+            web_clicker.close()
+
+        # 创建新的 WebClicker
+        web_clicker = WebClicker()
+
+        # 启动浏览器
+        if not web_clicker.start_browser(url):
+            return jsonify({
+                'success': False,
+                'message': '启动浏览器失败'
+            }), 500
+
+        # 注入选择器脚本
+        import time
+        time.sleep(2)  # 等待页面加载
+
+        if not web_clicker.inject_selector_script():
+            return jsonify({
+                'success': False,
+                'message': '注入选择器脚本失败'
+            }), 500
+
+        return jsonify({
+            'success': True,
+            'message': '浏览器已打开，请点击要抢的按钮'
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'启动失败: {str(e)}'
+        }), 500
+
+
+@app.route('/api/web/get-selector', methods=['GET'])
+def get_web_selector():
+    """获取用户选中的元素信息"""
+    global web_clicker
+
+    if not web_clicker:
+        return jsonify({
+            'success': False,
+            'message': '请先启动网页选择器'
+        }), 400
+
+    try:
+        selector_info = web_clicker.get_selected_element()
+
+        if not selector_info:
+            return jsonify({
+                'success': False,
+                'message': '尚未选择元素'
+            }), 400
+
+        return jsonify({
+            'success': True,
+            'data': selector_info
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'获取选择器失败: {str(e)}'
+        }), 500
+
+
+@app.route('/api/web/test-selector', methods=['POST'])
+def test_web_selector():
+    """测试选择器是否有效"""
+    global web_clicker
+
+    if not web_clicker:
+        return jsonify({
+            'success': False,
+            'message': '请先启动网页选择器'
+        }), 400
+
+    data = request.json
+    selector = data.get('selector')
+    selector_type = data.get('type', 'xpath')
+
+    if not selector:
+        return jsonify({
+            'success': False,
+            'message': '请提供选择器'
+        }), 400
+
+    try:
+        if web_clicker.test_selector(selector, selector_type):
+            return jsonify({
+                'success': True,
+                'message': '选择器有效，元素已高亮显示'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': '未找到匹配元素'
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'测试失败: {str(e)}'
+        }), 500
+
+
+@app.route('/api/web/close-selector', methods=['POST'])
+def close_web_selector():
+    """关闭网页选择器浏览器"""
+    global web_clicker
+
+    if web_clicker:
+        web_clicker.close()
+        web_clicker = None
+
+        return jsonify({
+            'success': True,
+            'message': '浏览器已关闭'
+        })
+    else:
+        return jsonify({
+            'success': True,
+            'message': '浏览器未运行'
+        })
 
 
 if __name__ == '__main__':

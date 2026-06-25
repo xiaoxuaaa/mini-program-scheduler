@@ -746,10 +746,62 @@
                 <input type="text" class="form-input" id="taskDesc">
             </div>
 
-            <!-- 任务表单 -->
-            <div id="taskForm">
+            <!-- 任务类型选择 -->
+            <div class="form-group">
+                <label class="form-label">任务类型 *</label>
+                <select class="form-input" id="taskType" onchange="switchTaskType()">
+                    <option value="multi_time">坐标点击任务（多时间点）</option>
+                    <option value="web_click">🌐 网页抢课任务（智能定位）</option>
+                </select>
+                <small style="color: #5C635D; font-size: 12px; margin-top: 4px; display: block;">
+                    💡 坐标点击：适用于桌面应用、微信小程序 | 网页抢课：适用于网页，自动定位按钮
+                </small>
+            </div>
+
+            <!-- 坐标点击任务表单 -->
+            <div id="coordinateTaskForm" style="display: block;">
                 <div class="timeline-editor" id="timelineEditor"></div>
                 <button type="button" class="btn btn-secondary btn-small" onclick="addTimelinePoint()">+ 添加时间点</button>
+            </div>
+
+            <!-- 网页抢课任务表单 -->
+            <div id="webTaskForm" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">网页地址 *</label>
+                    <input type="text" class="form-input" id="webTaskUrl" placeholder="http://example.com/course">
+                    <small style="color: #5C635D; font-size: 12px; margin-top: 4px; display: block;">
+                        输入抢课页面的完整地址
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">执行时间 *</label>
+                    <input type="time" class="form-input" id="webTaskTime" value="20:57">
+                    <small style="color: #5C635D; font-size: 12px; margin-top: 4px; display: block;">
+                        设置点击按钮的时间（精确到分钟）
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="webTaskPrepare" checked>
+                        提前 <input type="number" id="webTaskPrepareMinutes" value="5" min="1" max="30" style="width: 60px; padding: 4px; border: 1px solid #E7E1D7; border-radius: 4px;"> 分钟打开浏览器
+                    </label>
+                    <small style="color: #5C635D; font-size: 12px; margin-top: 4px; display: block;">
+                        ⚡ 推荐勾选！提前打开页面，到点瞬间点击，速度更快
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">选择目标按钮 *</label>
+                    <button type="button" class="btn btn-secondary" id="startSelectorBtn" onclick="openWebSelector()">
+                        🔍 可视化选择按钮
+                    </button>
+                    <small style="color: #5C635D; font-size: 12px; margin-top: 4px; display: block;">
+                        点击后会打开浏览器，用鼠标点击要抢的按钮
+                    </small>
+                    <div id="selectedElementInfo" style="margin-top: 12px; display: none;"></div>
+                </div>
             </div>
 
             <div class="modal-actions">

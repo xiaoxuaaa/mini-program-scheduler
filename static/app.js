@@ -447,6 +447,10 @@ function openAddTaskModal() {
     document.getElementById('taskName').value = '';
     document.getElementById('taskDesc').value = '';
 
+    // 重置任务类型为坐标点击
+    document.getElementById('taskType').value = 'multi_time';
+    switchTaskType();
+
     // 清空时间轴编辑器
     const editor = document.getElementById('timelineEditor');
     editor.innerHTML = '';
@@ -455,6 +459,27 @@ function openAddTaskModal() {
 
     // 添加一个默认时间点
     addTimelinePoint();
+
+    // 重置网页选择器
+    selectedSelector = null;
+    document.getElementById('selectedElementInfo').style.display = 'none';
+    document.getElementById('startSelectorBtn').disabled = false;
+    document.getElementById('startSelectorBtn').textContent = '🔍 选择按钮';
+}
+
+// 切换任务类型
+function switchTaskType() {
+    const taskType = document.getElementById('taskType').value;
+    const coordinateForm = document.getElementById('coordinateTaskForm');
+    const webForm = document.getElementById('webTaskForm');
+
+    if (taskType === 'web_click') {
+        coordinateForm.style.display = 'none';
+        webForm.style.display = 'block';
+    } else {
+        coordinateForm.style.display = 'block';
+        webForm.style.display = 'none';
+    }
 }
 
 // 关闭模态框
@@ -478,6 +503,7 @@ function closeHelpModal() {
 async function createTask() {
     const name = document.getElementById('taskName').value.trim();
     const description = document.getElementById('taskDesc').value.trim();
+    const taskType = document.getElementById('taskType').value;
 
     if (!name) {
         showToast('请输入任务名称', 'error');
@@ -487,47 +513,80 @@ async function createTask() {
     let taskData = {
         name,
         description,
-        type: 'multi_time'
+        type: taskType
     };
 
-    // 收集时间点任务
-    const points = document.querySelectorAll('.timeline-point');
-    const timeline = [];
+    // 网页抢课任务
+    if (taskType === 'web_click') {
+        const url = document.getElementById('webTaskUrl').value.trim();
+        const time = document.getElementById('webTaskTime').value;
+        const prepare = document.getElementById('webTaskPrepare').checked;
+        const prepareMinutes = parseInt(document.getElementById('webTaskPrepareMinutes').value) || 5;
 
-    for (let point of points) {
-        const pointName = point.querySelector('[data-field="name"]').value.trim();
-        const pointTime = point.querySelector('[data-field="time"]').value;
-        const showDesktop = point.querySelector('[data-field="show_desktop"]').checked;
-        const interval = parseFloat(point.querySelector('[data-field="interval"]').value) || 0.5;
-
-        const actionsEditor = point.querySelector('[data-field="actions"]');
-        const actions = collectActionsFromEditor(actionsEditor);
-
-        if (!pointName || !pointTime) {
-            showToast('请完整填写所有时间点的名称和时间', 'error');
+        if (!url) {
+            showToast('请输入网页地址', 'error');
             return;
         }
 
-        if (actions.length === 0) {
-            showToast(`时间点"${pointName}"至少需要一个操作`, 'error');
+        if (!time) {
+            showToast('请选择执行时间', 'error');
             return;
         }
 
-        timeline.push({
-            time: pointTime,
-            name: pointName,
-            show_desktop: showDesktop,
-            actions: actions,
-            interval: interval
-        });
-    }
+        if (!selectedSelector) {
+            showToast('请选择目标按钮', 'error');
+            return;
+        }
 
-    if (timeline.length === 0) {
-        showToast('请至少添加一个时间点', 'error');
-        return;
+        taskData.web_config = {
+            url: url,
+            time: time,
+            selector: selectedSelector.xpath,
+            selector_type: 'xpath',
+            prepare: prepare,
+            prepare_minutes: prepareMinutes
+        };
     }
+    // 坐标点击任务
+    else {
+        const points = document.querySelectorAll('.timeline-point');
+        const timeline = [];
 
-    taskData.timeline = timeline;
+        for (let point of points) {
+            const pointName = point.querySelector('[data-field="name"]').value.trim();
+            const pointTime = point.querySelector('[data-field="time"]').value;
+            const showDesktop = point.querySelector('[data-field="show_desktop"]').checked;
+            const interval = parseFloat(point.querySelector('[data-field="interval"]').value) || 0.5;
+
+            const actionsEditor = point.querySelector('[data-field="actions"]');
+            const actions = collectActionsFromEditor(actionsEditor);
+
+            if (!pointName || !pointTime) {
+                showToast('请完整填写所有时间点的名称和时间', 'error');
+                return;
+            }
+
+            if (actions.length === 0) {
+                showToast(`时间点"${pointName}"至少需要一个操作`, 'error');
+                return;
+            }
+
+            timeline.push({
+                time: pointTime,
+                name: pointName,
+                show_desktop: showDesktop,
+                actions: actions,
+                interval: interval
+            });
+        }
+
+        if (timeline.length === 0) {
+            showToast('请至少添加一个时间点', 'error');
+            return;
+        }
+
+        taskData.timeline = timeline;
+    }
 
     // 发送请求
     try {
@@ -672,3 +731,154 @@ document.getElementById('addTaskModal').addEventListener('click', function(e) {
         closeAddTaskModal();
     }
 });
+
+// ==================== 网页选择器功能 ====================
+
+let selectedSelector = null;  // 存储选中的选择器信息
+
+// 打开网页选择器
+async function openWebSelector() {
+    const url = document.getElementById('webTaskUrl').value.trim();
+
+    if (!url) {
+        showToast('请输入网页地址', 'error');
+        return;
+    }
+
+    // 显示加载状态
+    const btn = document.getElementById('startSelectorBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '正在打开浏览器...';
+
+    try {
+        const response = await fetch('/api/web/start-selector', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showToast('浏览器已打开，请点击要抢的按钮', 'success');
+            btn.textContent = '等待选择...';
+
+            // 开始轮询检查是否选择了元素
+            startPollingSelector();
+        } else {
+            showToast(result.message, 'error');
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    } catch (error) {
+        showToast('启动失败: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+// 轮询检查是否选择了元素
+function startPollingSelector() {
+    const pollInterval = setInterval(async () => {
+        try {
+            const response = await fetch('/api/web/get-selector');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                // 选择成功
+                clearInterval(pollInterval);
+                selectedSelector = result.data;
+                displaySelectedElement(result.data);
+
+                // 恢复按钮状态
+                const btn = document.getElementById('startSelectorBtn');
+                btn.disabled = false;
+                btn.textContent = '🔍 重新选择';
+
+                showToast('元素已选择！', 'success');
+            }
+        } catch (error) {
+            console.error('轮询错误:', error);
+        }
+    }, 1000);  // 每秒检查一次
+
+    // 60秒后停止轮询
+    setTimeout(() => {
+        clearInterval(pollInterval);
+        const btn = document.getElementById('startSelectorBtn');
+        btn.disabled = false;
+        btn.textContent = '🔍 选择按钮';
+    }, 60000);
+}
+
+// 显示选中的元素信息
+function displaySelectedElement(selectorInfo) {
+    const container = document.getElementById('selectedElementInfo');
+    container.style.display = 'block';
+
+    container.innerHTML = `
+        <div style="background: #FBF9F5; padding: 16px; border-radius: 8px; border: 1px solid #E7E1D7;">
+            <div style="margin-bottom: 12px;">
+                <strong style="color: #C4612F;">✅ 已选择元素：</strong>
+                <div style="margin-top: 8px; padding: 8px; background: white; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                    ${selectorInfo.outerHTML.substring(0, 150)}...
+                </div>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <strong>XPath:</strong>
+                <div style="margin-top: 4px; padding: 8px; background: white; border-radius: 4px; font-family: monospace; font-size: 11px; word-break: break-all;">
+                    ${selectorInfo.xpath}
+                </div>
+            </div>
+            <div style="margin-top: 12px;">
+                <button type="button" class="btn btn-secondary btn-small" onclick="testSelector()">测试选择器</button>
+                <button type="button" class="btn btn-secondary btn-small" onclick="closeWebSelector()">关闭浏览器</button>
+            </div>
+        </div>
+    `;
+}
+
+// 测试选择器
+async function testSelector() {
+    if (!selectedSelector) {
+        showToast('请先选择元素', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/web/test-selector', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                selector: selectedSelector.xpath,
+                type: 'xpath'
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showToast('测试成功！元素已在浏览器中高亮显示', 'success');
+        } else {
+            showToast(result.message, 'error');
+        }
+    } catch (error) {
+        showToast('测试失败: ' + error.message, 'error');
+    }
+}
+
+// 关闭网页选择器
+async function closeWebSelector() {
+    try {
+        await fetch('/api/web/close-selector', { method: 'POST' });
+        showToast('浏览器已关闭', 'success');
+
+        // 重置按钮
+        const btn = document.getElementById('startSelectorBtn');
+        btn.disabled = false;
+        btn.textContent = '🔍 选择按钮';
+    } catch (error) {
+        console.error('关闭失败:', error);
+    }
+}
