@@ -1,0 +1,108 @@
+{
+  "name": "键盘操作示例任务",
+  "type": "multi_time",
+  "description": "演示如何使用键盘操作功能",
+  "enabled": true,
+  "timeline": [
+    {
+      "time": "14:30",
+      "name": "打开记事本并输入文本",
+      "show_desktop": true,
+      "interval": 0.5,
+      "actions": [
+        {
+          "type": "hotkey",
+          "keys": ["win", "r"],
+          "label": "打开运行对话框"
+        },
+        {
+          "type": "wait",
+          "seconds": 1,
+          "label": "等待对话框打开"
+        },
+        {
+          "type": "type",
+          "text": "notepad",
+          "interval": 0.05,
+          "label": "输入notepad"
+        },
+        {
+          "type": "hotkey",
+          "keys": ["enter"],
+          "label": "回车打开记事本"
+        },
+        {
+          "type": "wait",
+          "seconds": 2,
+          "label": "等待记事本启动"
+        },
+        {
+          "type": "type",
+          "text": "Hello World! 这是自动输入的文本。",
+          "interval": 0.1,
+          "label": "输入测试文本"
+        },
+        {
+          "type": "hotkey",
+          "keys": ["enter"],
+          "label": "换行"
+        },
+        {
+          "type": "type",
+          "text": "当前时间: ",
+          "interval": 0.05,
+          "label": "输入时间标签"
+        }
+      ]
+    },
+    {
+      "time": "14:35",
+      "name": "登录操作示例",
+      "show_desktop": false,
+      "interval": 0.3,
+      "actions": [
+        {
+          "type": "click",
+          "x": 960,
+          "y": 540,
+          "clicks": 1,
+          "label": "点击用户名输入框"
+        },
+        {
+          "type": "type",
+          "text": "my_username",
+          "interval": 0.05,
+          "label": "输入用户名"
+        },
+        {
+          "type": "hotkey",
+          "keys": ["tab"],
+          "label": "切换到密码框"
+        },
+        {
+          "type": "type",
+          "text": "my_password",
+          "interval": 0.05,
+          "label": "输入密码"
+        },
+        {
+          "type": "hotkey",
+          "keys": ["enter"],
+          "label": "提交登录"
+        },
+        {
+          "type": "wait",
+          "seconds": 3,
+          "label": "等待登录完成"
+        },
+        {
+          "type": "click",
+          "x": 813,
+          "y": 354,
+          "clicks": 2,
+          "label": "双击目标按钮"
+        }
+      ]
+    }
+  ]
+}

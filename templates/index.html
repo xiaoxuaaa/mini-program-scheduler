@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定时点击助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+            background: #F7F4EF;
+            color: #1F2421;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(31, 36, 33, 0.06);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1F2421;
+            margin-bottom: 8px;
+        }
+
+        .version {
+            display: inline-block;
+            background: #F2E3D6;
+            color: #C4612F;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .control-panel {
+            background: #FBF9F5;
+            border: 1px solid #E7E1D7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: #C4612F;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #A94E22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(196, 97, 47, 0.3);
+        }
+
+        .btn-secondary {
+            background: #FFFFFF;
+            color: #1F2421;
+            border: 1px solid #E7E1D7;
+        }
+
+        .btn-secondary:hover {
+            background: #FBF9F5;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-small {
+            padding: 6px 16px;
+            font-size: 13px;
+            min-width: unset;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: unset;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px;
+            background: #FFFFFF;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E7E1D7;
+        }
+
+        .status-dot.active {
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .tasks-section {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(31, 36, 33, 0.06);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .task-card {
+            background: #FBF9F5;
+            border: 1px solid #E7E1D7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 36, 33, 0.08);
+        }
+
+        .task-card.disabled {
+            opacity: 0.6;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2421;
+            margin-bottom: 4px;
+        }
+
+        .task-type-badge {
+            display: inline-block;
+            background: #F2E3D6;
+            color: #C4612F;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        .task-time {
+            color: #C4612F;
+            font-weight: 500;
+            font-size: 18px;
+        }
+
+        .task-info {
+            color: #5C635D;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #5C635D;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(31, 36, 33, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1F2421;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #E7E1D7;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #FBF9F5;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #C4612F;
+            background: #FFFFFF;
+        }
+
+        /* 任务类型选择器 */
+        .task-type-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #E7E1D7;
+            padding-bottom: 8px;
+        }
+
+        .task-type-tab {
+            padding: 8px 16px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: transparent;
+            color: #5C635D;
+        }
+
+        .task-type-tab.active {
+            background: #F2E3D6;
+            color: #C4612F;
+        }
+
+        /* 时间轴编辑器 */
+        .timeline-editor {
+            margin-top: 20px;
+        }
+
+        .timeline-point {
+            background: #FBF9F5;
+            border: 2px solid #E7E1D7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .timeline-point-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #E7E1D7;
+        }
+
+        .timeline-point-title {
+            font-weight: 600;
+            color: #C4612F;
+        }
+
+        .timeline-point-remove {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .coordinates-list {
+            border: 1px solid #E7E1D7;
+            border-radius: 8px;
+            padding: 12px;
+            background: #FFFFFF;
+            margin-bottom: 12px;
+        }
+
+        .coordinate-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .coordinate-item input {
+            flex: 1;
+        }
+
+        /* 操作编辑器 */
+        .actions-editor {
+            border: 1px solid #E7E1D7;
+            border-radius: 8px;
+            padding: 12px;
+            background: #FFFFFF;
+            margin-bottom: 12px;
+        }
+
+        .action-item {
+            background: #FBF9F5;
+            border: 1px solid #E7E1D7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .action-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-buttons .btn-icon {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .action-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .action-type-badge.click {
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .action-type-badge.type {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+
+        .action-type-badge.hotkey {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .action-type-badge.paste {
+            background: #E1F5FE;
+            color: #0277BD;
+        }
+
+        .action-type-badge.wait {
+            background: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .action-item-body {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .action-item-body input,
+        .action-item-body select {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .action-add-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-add-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .empty-actions {
+            text-align: center;
+            padding: 20px;
+            color: #5C635D;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* Toast 通知 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1F2421;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            background: #4CAF50;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            header { padding: 20px; }
+            h1 { font-size: 24px; }
+            .control-buttons { flex-direction: column; }
+            .btn { min-width: unset; }
+            .task-header { flex-direction: column; gap: 12px; }
+            .modal-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>定时点击助手</h1>
+            <span class="version">Web v0.7.0</span>
+        </header>
+
+        <div class="control-panel">
+            <div class="control-buttons">
+                <button class="btn btn-primary" id="startBtn" onclick="startScheduler()">启动调度器</button>
+                <button class="btn btn-secondary" id="stopBtn" onclick="stopScheduler()">停止调度器</button>
+                <button class="btn btn-secondary" onclick="openAddTaskModal()">添加任务</button>
+            </div>
+            <div class="status" id="statusBar">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">调度器未运行</span>
+            </div>
+        </div>
+
+        <div class="tasks-section">
+            <div class="section-header">
+                <h2 class="section-title">任务列表</h2>
+                <span id="taskCount">0 个任务</span>
+            </div>
+            <div id="taskList"></div>
+        </div>
+    </div>
+
+    <!-- 添加任务模态框 -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <h3 class="modal-header">添加新任务</h3>
+
+            <!-- 通用字段 -->
+            <div class="form-group">
+                <label class="form-label">任务名称 *</label>
+                <input type="text" class="form-input" id="taskName" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">任务描述</label>
+                <input type="text" class="form-input" id="taskDesc">
+            </div>
+
+            <!-- 任务表单 -->
+            <div id="taskForm">
+                <div class="timeline-editor" id="timelineEditor"></div>
+                <button type="button" class="btn btn-secondary btn-small" onclick="addTimelinePoint()">+ 添加时间点</button>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" onclick="createTask()" id="submitTaskBtn">创建任务</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddTaskModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

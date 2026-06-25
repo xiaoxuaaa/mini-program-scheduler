@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "示例任务 - 登录系统",
+    "type": "multi_time",
+    "description": "演示如何使用粘贴功能输入中文",
+    "enabled": false,
+    "timeline": [
+      {
+        "time": "09:00",
+        "name": "自动登录",
+        "show_desktop": false,
+        "interval": 0.5,
+        "actions": [
+          {
+            "type": "click",
+            "x": 800,
+            "y": 300,
+            "clicks": 1,
+            "label": "点击用户名框"
+          },
+          {
+            "type": "paste",
+            "text": "admin",
+            "label": "粘贴用户名"
+          },
+          {
+            "type": "hotkey",
+            "keys": ["tab"],
+            "label": "切换到密码框"
+          },
+          {
+            "type": "paste",
+            "text": "your_password_here",
+            "label": "粘贴密码"
+          },
+          {
+            "type": "hotkey",
+            "keys": ["enter"],
+            "label": "提交登录"
+          }
+        ]
+      }
+    ]
+  }
+]
