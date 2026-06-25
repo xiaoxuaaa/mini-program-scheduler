@@ -123,12 +123,12 @@ class Clicker:
 
     def execute_action(self, action: Dict[str, Any]) -> bool:
         """
-        执行单个操作（点击、输入、按键、粘贴等）
+        执行单个操作（点击、输入、按键、粘贴、等待、调整间隔等）
 
         Args:
             action: 操作配置字典，格式：
                 {
-                    "type": "click" | "type" | "hotkey" | "wait" | "paste",
+                    "type": "click" | "type" | "hotkey" | "wait" | "paste" | "change_interval",
                     "label": "操作描述",
                     ... 其他参数
                 }
@@ -217,6 +217,12 @@ class Clicker:
                 time.sleep(seconds)
                 return True
 
+            elif action_type == "change_interval":
+                # 调整间隔（这个操作本身不执行任何动作，只是标记）
+                new_interval = action.get("interval", 0.5)
+                print(f"  → {label}: 调整操作间隔为 {new_interval} 秒")
+                return True
+
             else:
                 print(f"❌ 未知的操作类型: {action_type}")
                 return False
@@ -231,7 +237,7 @@ class Clicker:
 
         Args:
             actions: 操作列表
-            interval: 操作之间的间隔时间（秒），None 则使用默认间隔
+            interval: 操作之间的初始间隔时间（秒），None 则使用默认间隔
 
         Returns:
             是否全部成功
@@ -245,16 +251,24 @@ class Clicker:
 
         print(f"开始执行操作序列，共 {len(actions)} 个操作")
         success = True
+        current_interval = interval  # 当前间隔，可以动态改变
 
         for i, action in enumerate(actions, 1):
             print(f"[{i}/{len(actions)}]", end=" ")
+
+            # 检查是否是调整间隔操作
+            if action.get("type") == "change_interval":
+                new_interval = action.get("interval", 0.5)
+                current_interval = new_interval
+                print(f"  ⚡ 调整操作间隔为 {new_interval} 秒")
+                continue  # 跳过等待，直接执行下一个操作
 
             if not self.execute_action(action):
                 success = False
 
             # 操作之间的间隔（最后一个操作后不等待）
             if i < len(actions):
-                time.sleep(interval)
+                time.sleep(current_interval)
 
         return success
 

@@ -451,6 +451,12 @@
             color: #388E3C;
         }
 
+        .action-type-badge.change_interval {
+            background: #F2E3D6;
+            color: #C4612F;
+            font-weight: 600;
+        }
+
         .action-item-body {
             display: flex;
             gap: 8px;
@@ -805,6 +811,12 @@
                             <div class="operation-desc">暂停指定秒数（支持小数）</div>
                             <div class="operation-tip">💡 用于等待页面加载、动画等</div>
                         </div>
+                        <div class="operation-item">
+                            <div class="operation-icon">⚡</div>
+                            <div class="operation-name">调整间隔</div>
+                            <div class="operation-desc">改变后续操作的执行间隔时间</div>
+                            <div class="operation-tip">💡 抢课等操作可设置更快的间隔</div>
+                        </div>
                     </div>
                 </section>
 
@@ -822,15 +834,17 @@
                     </div>
 
                     <div class="example-box">
-                        <div class="example-title">示例2：小程序抢课</div>
+                        <div class="example-title">示例2：小程序抢课（使用调整间隔）</div>
                         <ol class="example-steps">
-                            <li><span class="step-badge">时间点 1</span> 20:55 - 打开微信小程序</li>
+                            <li><span class="step-badge">时间点 1</span> 20:55 - 打开微信小程序（间隔 0.5秒）</li>
                             <li style="margin-left: 20px;"><span class="step-badge">按键</span> Win+D 回到桌面</li>
                             <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击微信图标</li>
                             <li style="margin-left: 20px;"><span class="step-badge">等待</span> 等待 2 秒</li>
                             <li><span class="step-badge">时间点 2</span> 21:00 - 执行抢课</li>
                             <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击目标课程</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">⚡ 调整间隔</span> 改为 0.2秒（加速抢课）</li>
                             <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击立即预约</li>
+                            <li style="margin-left: 20px;"><span class="step-badge">点击</span> 点击确认按钮</li>
                         </ol>
                     </div>
                 </section>

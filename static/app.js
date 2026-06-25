@@ -190,7 +190,8 @@ function addTimelineAction(pointId, actionType) {
         'type': '输入',
         'paste': '粘贴',
         'hotkey': '按键',
-        'wait': '等待'
+        'wait': '等待',
+        'change_interval': '调整间隔'
     }[actionType];
 
     div.innerHTML = `
@@ -248,6 +249,15 @@ function getActionBodyHTML(actionType, actionId) {
             return `
                 <input type="text" placeholder="操作描述" class="form-input" data-action-field="label" value="等待">
                 <input type="number" placeholder="等待秒数" class="form-input" data-action-field="seconds" value="1" step="0.1" min="0" style="max-width: 150px;">
+            `;
+
+        case 'change_interval':
+            return `
+                <input type="text" placeholder="操作描述" class="form-input" data-action-field="label" value="调整操作间隔">
+                <input type="number" placeholder="新间隔(秒)" class="form-input" data-action-field="interval" value="0.3" step="0.1" min="0.1" max="5" style="max-width: 150px;">
+                <small style="width: 100%; color: #5C635D; font-size: 12px; margin-top: 4px;">
+                    ⚡ 此操作之后的所有操作将使用新的间隔时间
+                </small>
             `;
 
         default:
@@ -330,7 +340,8 @@ function collectActionsFromEditor(actionsEditor) {
             '输入': 'type',
             '粘贴': 'paste',
             '按键': 'hotkey',
-            '等待': 'wait'
+            '等待': 'wait',
+            '调整间隔': 'change_interval'
         };
 
         const type = typeMap[actionType];
@@ -409,6 +420,7 @@ function addTimelinePoint() {
                 <button type="button" class="btn btn-secondary btn-small" onclick="addTimelineAction(${pointId}, 'paste')">+ 粘贴</button>
                 <button type="button" class="btn btn-secondary btn-small" onclick="addTimelineAction(${pointId}, 'hotkey')">+ 按键</button>
                 <button type="button" class="btn btn-secondary btn-small" onclick="addTimelineAction(${pointId}, 'wait')">+ 等待</button>
+                <button type="button" class="btn btn-secondary btn-small" onclick="addTimelineAction(${pointId}, 'change_interval')" style="background: #F2E3D6; color: #C4612F;">⚡ 调整间隔</button>
             </div>
         </div>
     `;
